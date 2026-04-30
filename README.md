@@ -9,6 +9,16 @@ SDK e exemplos oficiais da [Nvoip](https://www.nvoip.com.br/) para integrar a AP
 - Java 11+
 - Maven 3.8+
 
+## Instalacao
+
+```xml
+<dependency>
+  <groupId>br.com.nvoip</groupId>
+  <artifactId>nvoip-java</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
 ## Configuração
 
 ```bash

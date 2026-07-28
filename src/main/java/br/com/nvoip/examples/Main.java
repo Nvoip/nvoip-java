@@ -85,10 +85,39 @@ public final class Main {
         String bodyVariables = firstNonBlank(System.getenv("NVOIP_WA_BODY_VARIABLES"), "[]");
         String headerVariables = firstNonBlank(System.getenv("NVOIP_WA_HEADER_VARIABLES"), "[]");
         String toFlow = firstNonBlank(System.getenv("NVOIP_WA_TO_FLOW"), "false");
+        String recipientType = firstNonBlank(System.getenv("NVOIP_WA_RECIPIENT_TYPE"), "").toLowerCase();
+        String recipientValue = firstNonBlank(System.getenv("NVOIP_WA_RECIPIENT_VALUE"), "");
+        String recipientJson;
+
+        if (recipientType.isBlank()) {
+            String destination = env("NVOIP_WA_DESTINATION");
+            if (!destination.matches("\\+?[0-9]{8,20}")) {
+                throw new IllegalArgumentException("NVOIP_WA_DESTINATION must be a phone number; use recipient for BSUID");
+            }
+            recipientJson = "\"destination\":\"" + escapeJson(destination) + "\"";
+        } else {
+            if (!recipientType.matches("phone|bsuid|parent_bsuid") || recipientValue.isBlank()) {
+                throw new IllegalArgumentException("NVOIP_WA_RECIPIENT_TYPE must be phone, bsuid or parent_bsuid and requires NVOIP_WA_RECIPIENT_VALUE");
+            }
+            if (recipientValue.startsWith("@")) {
+                throw new IllegalArgumentException("@username is not a WhatsApp recipient; use a BSUID or parent BSUID");
+            }
+            if (recipientType.equals("phone") && !recipientValue.matches("\\+?[0-9]{8,20}")) {
+                throw new IllegalArgumentException("A phone recipient must contain only an optional leading + and 8 to 20 digits");
+            }
+            if (!recipientType.equals("phone") && (recipientValue.matches(".*\\s+.*") || recipientValue.length() > 256)) {
+                throw new IllegalArgumentException("A BSUID must be an opaque value without whitespace (maximum 256 characters)");
+            }
+            if (Boolean.parseBoolean(toFlow) && !recipientType.equals("phone")) {
+                throw new IllegalArgumentException("WhatsApp Flow and attendance require a phone recipient");
+            }
+            recipientJson = "\"recipient\":{\"type\":\"" + recipientType + "\",\"value\":\""
+                + escapeJson(recipientValue) + "\"}";
+        }
 
         return "{"
             + "\"idTemplate\":\"" + escapeJson(env("NVOIP_WA_TEMPLATE_ID")) + "\","
-            + "\"destination\":\"" + escapeJson(env("NVOIP_WA_DESTINATION")) + "\","
+            + recipientJson + ","
             + "\"instance\":\"" + escapeJson(env("NVOIP_WA_INSTANCE")) + "\","
             + "\"language\":\"" + escapeJson(firstNonBlank(System.getenv("NVOIP_WA_LANGUAGE"), "pt_BR")) + "\","
             + "\"bodyVariables\":" + bodyVariables + ","

@@ -4,6 +4,12 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish to Maven Central after validation
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -11,7 +17,7 @@ permissions:
 jobs:
   maven-central:
     name: Publish to Maven Central
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, nvoip-ci-public-release]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -23,7 +29,10 @@ jobs:
           server-password: MAVEN_CENTRAL_TOKEN
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
-      - run: mvn --batch-mode deploy -P release
+      - if: github.event_name != 'release' && !inputs.publish
+        run: mvn --batch-mode verify
+      - if: github.event_name == 'release' || inputs.publish
+        run: mvn --batch-mode deploy -P release
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}

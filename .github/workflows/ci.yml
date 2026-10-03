@@ -16,4 +16,4 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - run: mvn --batch-mode -DskipTests package
+      - run: mvn --batch-mode test package

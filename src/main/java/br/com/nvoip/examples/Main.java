@@ -17,7 +17,7 @@ public final class Main {
         String command = args[0];
         switch (command) {
             case "auth-token":
-                System.out.println(client.createAccessToken(env("NVOIP_NUMBERSIP"), env("NVOIP_USER_TOKEN")));
+                System.out.println(client.createAccessToken());
                 break;
             case "balance":
                 System.out.println(client.getBalance(accessTokenOrCreate(client)));
@@ -43,7 +43,7 @@ public final class Main {
                 ));
                 break;
             case "check-otp":
-                System.out.println(client.checkOtp(env("NVOIP_OTP_CODE"), env("NVOIP_OTP_KEY")));
+                System.out.println(client.checkOtp(accessTokenOrCreate(client), env("NVOIP_OTP_CODE"), env("NVOIP_OTP_KEY")));
                 break;
             case "wa-list":
                 System.out.println(client.listWhatsAppTemplates(accessTokenOrCreate(client)));
@@ -64,7 +64,7 @@ public final class Main {
         if (!accessToken.isBlank()) {
             return accessToken;
         }
-        String response = client.createAccessToken(env("NVOIP_NUMBERSIP"), env("NVOIP_USER_TOKEN"));
+        String response = client.createAccessToken();
         String token = extractJsonString(response, "access_token");
         if (token.isBlank()) {
             throw new IllegalStateException("access_token not found in OAuth response: " + response);

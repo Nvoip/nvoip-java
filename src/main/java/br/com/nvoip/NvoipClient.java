@@ -17,7 +17,7 @@ public final class NvoipClient {
     private final HttpClient httpClient;
 
     public NvoipClient(String baseUrl, String oauthClientId, String oauthClientSecret) {
-        this.baseUrl = trimTrailingSlash(baseUrl == null || baseUrl.isBlank() ? "https://api.nvoip.com.br/v2" : baseUrl);
+        this.baseUrl = trimTrailingSlash(baseUrl == null || baseUrl.isBlank() ? "https://api.nvoip.com.br/v3" : baseUrl);
         this.oauthClientId = oauthClientId;
         this.oauthClientSecret = oauthClientSecret;
         this.httpClient = HttpClient.newBuilder()
@@ -29,14 +29,12 @@ public final class NvoipClient {
         return Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createAccessToken(String numbersip, String userToken) throws IOException, InterruptedException {
-        String formBody = "username=" + encode(numbersip)
-            + "&password=" + encode(userToken)
-            + "&grant_type=password";
+    public String createAccessToken() throws IOException, InterruptedException {
+        String formBody = "grant_type=client_credentials";
 
         return request(
             HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/oauth/token"))
+                .uri(URI.create("https://api.nvoip.com.br/auth/oauth2/token"))
                 .header("Authorization", "Basic " + resolveBasicAuth())
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(formBody))
@@ -48,7 +46,7 @@ public final class NvoipClient {
 
         return request(
             HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/oauth/token"))
+                .uri(URI.create("https://api.nvoip.com.br/auth/oauth2/token"))
                 .header("Authorization", "Basic " + resolveBasicAuth())
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(formBody))

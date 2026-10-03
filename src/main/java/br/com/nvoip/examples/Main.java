@@ -43,7 +43,7 @@ public final class Main {
                 ));
                 break;
             case "check-otp":
-                System.out.println(client.checkOtp(env("NVOIP_OTP_CODE"), env("NVOIP_OTP_KEY")));
+                System.out.println(client.checkOtp(accessTokenOrCreate(client), env("NVOIP_OTP_CODE"), env("NVOIP_OTP_KEY")));
                 break;
             case "wa-list":
                 System.out.println(client.listWhatsAppTemplates(accessTokenOrCreate(client)));

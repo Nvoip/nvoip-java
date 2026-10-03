@@ -26,7 +26,7 @@ public final class NvoipClient {
     }
 
     public static String encodeBasicAuth(String clientId, String clientSecret) {
-        return Base64.getEncoder().encodeToString((clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString((encode(clientId) + ":" + encode(clientSecret)).getBytes(StandardCharsets.UTF_8));
     }
 
     public String createAccessToken() throws IOException, InterruptedException {
@@ -85,10 +85,11 @@ public final class NvoipClient {
         return jsonRequest("/otp", accessToken, payloadJson);
     }
 
-    public String checkOtp(String code, String key) throws IOException, InterruptedException {
+    public String checkOtp(String accessToken, String code, String key) throws IOException, InterruptedException {
         return request(
             HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/check/otp?code=" + encode(code) + "&key=" + encode(key)))
+                .header("Authorization", "Bearer " + accessToken)
                 .GET()
         );
     }

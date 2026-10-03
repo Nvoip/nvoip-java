@@ -14,12 +14,18 @@ public final class NvoipClient {
     private final String baseUrl;
     private final String oauthClientId;
     private final String oauthClientSecret;
+    private final String tokenUrl;
     private final HttpClient httpClient;
 
     public NvoipClient(String baseUrl, String oauthClientId, String oauthClientSecret) {
+        this(baseUrl, oauthClientId, oauthClientSecret, "https://api.nvoip.com.br/auth/oauth2/token");
+    }
+
+    public NvoipClient(String baseUrl, String oauthClientId, String oauthClientSecret, String tokenUrl) {
         this.baseUrl = trimTrailingSlash(baseUrl == null || baseUrl.isBlank() ? "https://api.nvoip.com.br/v3" : baseUrl);
         this.oauthClientId = oauthClientId;
         this.oauthClientSecret = oauthClientSecret;
+        this.tokenUrl = tokenUrl == null || tokenUrl.isBlank() ? "https://api.nvoip.com.br/auth/oauth2/token" : tokenUrl;
         this.httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(30))
             .build();
@@ -34,7 +40,7 @@ public final class NvoipClient {
 
         return request(
             HttpRequest.newBuilder()
-                .uri(URI.create("https://api.nvoip.com.br/auth/oauth2/token"))
+                .uri(URI.create(tokenUrl))
                 .header("Authorization", "Basic " + resolveBasicAuth())
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(formBody))
@@ -46,7 +52,7 @@ public final class NvoipClient {
 
         return request(
             HttpRequest.newBuilder()
-                .uri(URI.create("https://api.nvoip.com.br/auth/oauth2/token"))
+                .uri(URI.create(tokenUrl))
                 .header("Authorization", "Basic " + resolveBasicAuth())
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(formBody))

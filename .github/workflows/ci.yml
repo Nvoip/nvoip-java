@@ -7,11 +7,16 @@ on:
       - main
       - master
 
+permissions:
+  contents: read
+
 jobs:
   java:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
